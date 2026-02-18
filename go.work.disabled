@@ -1,0 +1,9 @@
+go 1.25.7
+
+use (
+	.
+	./10000-Autonomous-Actors/900-FinOpsManager
+	./20000-Context-Bridges/900-FinOpsBridge
+	./gen/olympus/finops/v1
+	./gen/olympus/finops/v1/finopsv1connect
+)
