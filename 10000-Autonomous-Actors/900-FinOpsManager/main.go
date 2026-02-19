@@ -10,8 +10,8 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 
-	"OlympusGCP-FinOps/gen/finops/v1x/finopsv1connect"
-	finopsv1 "OlympusGCP-FinOps/gen/finops/v1x"
+	"OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1x/finopsv1connect"
+	finopsv1 "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1x"
 )
 
 type FinOpsServer struct{}

@@ -8,7 +8,7 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	v1 "OlympusGCP-FinOps/gen/finops/v1x"
+	v1 "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1x"
 	http "net/http"
 	strings "strings"
 )
