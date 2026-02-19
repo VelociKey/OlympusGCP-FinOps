@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        (unknown)
-// source: finops/v1/finops.proto
+// source: olympus/finops/v1/finops.proto
 
 package finopsv1
 
@@ -237,11 +237,115 @@ func (x *ValidateBudgetResponse) GetMessage() string {
 	return ""
 }
 
+type TrackUsageRequest struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Service          string                 `protobuf:"bytes,1,opt,name=service,proto3" json:"service,omitempty"`
+	ResourceId       string                 `protobuf:"bytes,2,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	ConsumptionUnits float64                `protobuf:"fixed64,3,opt,name=consumption_units,json=consumptionUnits,proto3" json:"consumption_units,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *TrackUsageRequest) Reset() {
+	*x = TrackUsageRequest{}
+	mi := &file_olympus_finops_v1_finops_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TrackUsageRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TrackUsageRequest) ProtoMessage() {}
+
+func (x *TrackUsageRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_olympus_finops_v1_finops_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TrackUsageRequest.ProtoReflect.Descriptor instead.
+func (*TrackUsageRequest) Descriptor() ([]byte, []int) {
+	return file_olympus_finops_v1_finops_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *TrackUsageRequest) GetService() string {
+	if x != nil {
+		return x.Service
+	}
+	return ""
+}
+
+func (x *TrackUsageRequest) GetResourceId() string {
+	if x != nil {
+		return x.ResourceId
+	}
+	return ""
+}
+
+func (x *TrackUsageRequest) GetConsumptionUnits() float64 {
+	if x != nil {
+		return x.ConsumptionUnits
+	}
+	return 0
+}
+
+type TrackUsageResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CurrentMtdUsd float64                `protobuf:"fixed64,1,opt,name=current_mtd_usd,json=currentMtdUsd,proto3" json:"current_mtd_usd,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TrackUsageResponse) Reset() {
+	*x = TrackUsageResponse{}
+	mi := &file_olympus_finops_v1_finops_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TrackUsageResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TrackUsageResponse) ProtoMessage() {}
+
+func (x *TrackUsageResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_olympus_finops_v1_finops_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TrackUsageResponse.ProtoReflect.Descriptor instead.
+func (*TrackUsageResponse) Descriptor() ([]byte, []int) {
+	return file_olympus_finops_v1_finops_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *TrackUsageResponse) GetCurrentMtdUsd() float64 {
+	if x != nil {
+		return x.CurrentMtdUsd
+	}
+	return 0
+}
+
 var File_olympus_finops_v1_finops_proto protoreflect.FileDescriptor
 
 const file_olympus_finops_v1_finops_proto_rawDesc = "" +
 	"\n" +
-	"\x1efinops/v1/finops.proto\x12\x11olympus.finops.v1\"\xde\x01\n" +
+	"\x1eolympus/finops/v1/finops.proto\x12\x11olympus.finops.v1\"\xde\x01\n" +
 	"\x13EstimateCostRequest\x12\x18\n" +
 	"\aservice\x18\x01 \x01(\tR\aservice\x12\x16\n" +
 	"\x06action\x18\x02 \x01(\tR\x06action\x12V\n" +
@@ -262,10 +366,19 @@ const file_olympus_finops_v1_finops_proto_rawDesc = "" +
 	"\x10requested_amount\x18\x02 \x01(\x01R\x0frequestedAmount\"N\n" +
 	"\x16ValidateBudgetResponse\x12\x1a\n" +
 	"\bapproved\x18\x01 \x01(\bR\bapproved\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2\xd7\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"{\n" +
+	"\x11TrackUsageRequest\x12\x18\n" +
+	"\aservice\x18\x01 \x01(\tR\aservice\x12\x1f\n" +
+	"\vresource_id\x18\x02 \x01(\tR\n" +
+	"resourceId\x12+\n" +
+	"\x11consumption_units\x18\x03 \x01(\x01R\x10consumptionUnits\"<\n" +
+	"\x12TrackUsageResponse\x12&\n" +
+	"\x0fcurrent_mtd_usd\x18\x01 \x01(\x01R\rcurrentMtdUsd2\xb2\x02\n" +
 	"\rFinOpsService\x12_\n" +
 	"\fEstimateCost\x12&.olympus.finops.v1.EstimateCostRequest\x1a'.olympus.finops.v1.EstimateCostResponse\x12e\n" +
-	"\x0eValidateBudget\x12(.olympus.finops.v1.ValidateBudgetRequest\x1a).olympus.finops.v1.ValidateBudgetResponseBGZEfinops/gen/finops/v1;finopsv1b\x06proto3"
+	"\x0eValidateBudget\x12(.olympus.finops.v1.ValidateBudgetRequest\x1a).olympus.finops.v1.ValidateBudgetResponse\x12Y\n" +
+	"\n" +
+	"TrackUsage\x12$.olympus.finops.v1.TrackUsageRequest\x1a%.olympus.finops.v1.TrackUsageResponseBfZdOlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1x;finopsv1b\x06proto3"
 
 var (
 	file_olympus_finops_v1_finops_proto_rawDescOnce sync.Once
@@ -279,22 +392,26 @@ func file_olympus_finops_v1_finops_proto_rawDescGZIP() []byte {
 	return file_olympus_finops_v1_finops_proto_rawDescData
 }
 
-var file_olympus_finops_v1_finops_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_olympus_finops_v1_finops_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_olympus_finops_v1_finops_proto_goTypes = []any{
 	(*EstimateCostRequest)(nil),    // 0: olympus.finops.v1.EstimateCostRequest
 	(*EstimateCostResponse)(nil),   // 1: olympus.finops.v1.EstimateCostResponse
 	(*ValidateBudgetRequest)(nil),  // 2: olympus.finops.v1.ValidateBudgetRequest
 	(*ValidateBudgetResponse)(nil), // 3: olympus.finops.v1.ValidateBudgetResponse
-	nil,                            // 4: olympus.finops.v1.EstimateCostRequest.ParametersEntry
+	(*TrackUsageRequest)(nil),      // 4: olympus.finops.v1.TrackUsageRequest
+	(*TrackUsageResponse)(nil),     // 5: olympus.finops.v1.TrackUsageResponse
+	nil,                            // 6: olympus.finops.v1.EstimateCostRequest.ParametersEntry
 }
 var file_olympus_finops_v1_finops_proto_depIdxs = []int32{
-	4, // 0: olympus.finops.v1.EstimateCostRequest.parameters:type_name -> olympus.finops.v1.EstimateCostRequest.ParametersEntry
+	6, // 0: olympus.finops.v1.EstimateCostRequest.parameters:type_name -> olympus.finops.v1.EstimateCostRequest.ParametersEntry
 	0, // 1: olympus.finops.v1.FinOpsService.EstimateCost:input_type -> olympus.finops.v1.EstimateCostRequest
 	2, // 2: olympus.finops.v1.FinOpsService.ValidateBudget:input_type -> olympus.finops.v1.ValidateBudgetRequest
-	1, // 3: olympus.finops.v1.FinOpsService.EstimateCost:output_type -> olympus.finops.v1.EstimateCostResponse
-	3, // 4: olympus.finops.v1.FinOpsService.ValidateBudget:output_type -> olympus.finops.v1.ValidateBudgetResponse
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
+	4, // 3: olympus.finops.v1.FinOpsService.TrackUsage:input_type -> olympus.finops.v1.TrackUsageRequest
+	1, // 4: olympus.finops.v1.FinOpsService.EstimateCost:output_type -> olympus.finops.v1.EstimateCostResponse
+	3, // 5: olympus.finops.v1.FinOpsService.ValidateBudget:output_type -> olympus.finops.v1.ValidateBudgetResponse
+	5, // 6: olympus.finops.v1.FinOpsService.TrackUsage:output_type -> olympus.finops.v1.TrackUsageResponse
+	4, // [4:7] is the sub-list for method output_type
+	1, // [1:4] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -311,7 +428,7 @@ func file_olympus_finops_v1_finops_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_olympus_finops_v1_finops_proto_rawDesc), len(file_olympus_finops_v1_finops_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

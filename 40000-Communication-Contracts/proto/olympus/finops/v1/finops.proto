@@ -5,8 +5,10 @@ package olympus.finops.v1;
 option go_package = "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1x;finopsv1";
 
 service FinOpsService {
+  // Cloud Billing & Usage Intent
   rpc EstimateCost(EstimateCostRequest) returns (EstimateCostResponse);
   rpc ValidateBudget(ValidateBudgetRequest) returns (ValidateBudgetResponse);
+  rpc TrackUsage(TrackUsageRequest) returns (TrackUsageResponse);
 }
 
 message EstimateCostRequest {
@@ -30,4 +32,12 @@ message ValidateBudgetResponse {
   string message = 2;
 }
 
+message TrackUsageRequest {
+  string service = 1;
+  string resource_id = 2;
+  double consumption_units = 3;
+}
 
+message TrackUsageResponse {
+  double current_mtd_usd = 1;
+}
