@@ -1,7 +1,8 @@
-version: v1
-managed:
-  enabled: true
-  override:
-    - file_option: go_package_prefix
-      value: OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen
-version: v1 plugins:   - plugin: buf.build/protocolbuffers/go     out: ../430-Protocol-Definitions/000-gen     opt: paths=source_relative   - plugin: buf.build/connectrpc/go     out: ../430-Protocol-Definitions/000-gen     opt: paths=source_relative
+version: v2
+plugins:
+  - local: protoc-gen-go
+    out: ../../..
+    opt: paths=source_relative
+  - local: protoc-gen-connect-go
+    out: ../../..
+    opt: paths=source_relative
