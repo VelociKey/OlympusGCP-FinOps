@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package olympus.finops.v1;
 
-option go_package = "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1x;finopsv1";
+option go_package = "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1;finopsv1";
 
 service FinOpsService {
   // Cloud Billing & Usage Intent

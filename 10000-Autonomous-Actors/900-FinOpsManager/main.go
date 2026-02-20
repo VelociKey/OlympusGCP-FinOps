@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"sync"
 	"time"
 
 	"connectrpc.com/connect"
@@ -12,12 +13,15 @@ import (
 
 	econotel "Olympus2/90000-Enablement-Labs/P0000-pkg/000-econotel"
 	whisper "Olympus2/90000-Enablement-Labs/P0000-pkg/000-whisper"
-	finv1 "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1x"
-	"OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1x/finopsv1connect"
+	finv1 "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1"
+	"OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1/finopsv1connect"
 )
 
 type FinOpsServer struct {
 	logger *whisper.WhisperLog
+	mu     sync.Mutex
+	usage  map[string]float64
+	budget float64
 }
 
 func (s *FinOpsServer) EstimateCost(ctx context.Context, req *connect.Request[finv1.EstimateCostRequest]) (*connect.Response[finv1.EstimateCostResponse], error) {
@@ -44,23 +48,50 @@ func (s *FinOpsServer) EstimateCost(ctx context.Context, req *connect.Request[fi
 }
 
 func (s *FinOpsServer) ValidateBudget(ctx context.Context, req *connect.Request[finv1.ValidateBudgetRequest]) (*connect.Response[finv1.ValidateBudgetResponse], error) {
-	// High-fidelity Budget check against local JEBNF state
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	used := 0.0
+	for _, v := range s.usage {
+		used += v
+	}
+
+	approved := (used + req.Msg.RequestedAmount) <= s.budget
+	msg := "Within Workstation Local Quota"
+	if !approved {
+		msg = "Workstation Budget Exceeded"
+	}
+
 	return connect.NewResponse(&finv1.ValidateBudgetResponse{
-		Approved: true,
-		Message:  "Within Workstation Local Quota",
+		Approved: approved,
+		Message:  msg,
 	}), nil
 }
 
 func (s *FinOpsServer) TrackUsage(ctx context.Context, req *connect.Request[finv1.TrackUsageRequest]) (*connect.Response[finv1.TrackUsageResponse], error) {
-	// Aggregate from econotel / whisper logs
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Track usage units for the requested service
+	s.usage[req.Msg.Service] += req.Msg.ConsumptionUnits
+
+	used := 0.0
+	for _, v := range s.usage {
+		used += v
+	}
+
 	return connect.NewResponse(&finv1.TrackUsageResponse{
-		CurrentMtdUsd: 12.34,
+		CurrentMtdUsd: used,
 	}), nil
 }
 
 func main() {
 	w := whisper.New("FinOpsManager", "gcp_finops.lpsv")
-	server := &FinOpsServer{logger: w}
+	server := &FinOpsServer{
+		logger: w,
+		usage:  make(map[string]float64),
+		budget: 100.0, // Default workstation budget pool
+	}
 
 	mux := http.NewServeMux()
 	path, handler := finopsv1connect.NewFinOpsServiceHandler(server)

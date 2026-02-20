@@ -7,10 +7,10 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
-	"github.com/mark3labs/mcp-go/mcp"
+	"mcp-go/mcp"
 
-	"OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1x/finopsv1connect"
-	finopsv1 "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1x"
+	"OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1/finopsv1connect"
+	finopsv1 "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1"
 	"Olympus2/90000-Enablement-Labs/P0000-pkg/000-mcp-bridge"
 )
 

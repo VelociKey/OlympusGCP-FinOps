@@ -5,7 +5,7 @@
 package finopsv1connect
 
 import (
-	v1x "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1x"
+	v1 "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1"
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
@@ -47,9 +47,9 @@ const (
 // FinOpsServiceClient is a client for the olympus.finops.v1.FinOpsService service.
 type FinOpsServiceClient interface {
 	// Cloud Billing & Usage Intent
-	EstimateCost(context.Context, *connect.Request[v1x.EstimateCostRequest]) (*connect.Response[v1x.EstimateCostResponse], error)
-	ValidateBudget(context.Context, *connect.Request[v1x.ValidateBudgetRequest]) (*connect.Response[v1x.ValidateBudgetResponse], error)
-	TrackUsage(context.Context, *connect.Request[v1x.TrackUsageRequest]) (*connect.Response[v1x.TrackUsageResponse], error)
+	EstimateCost(context.Context, *connect.Request[v1.EstimateCostRequest]) (*connect.Response[v1.EstimateCostResponse], error)
+	ValidateBudget(context.Context, *connect.Request[v1.ValidateBudgetRequest]) (*connect.Response[v1.ValidateBudgetResponse], error)
+	TrackUsage(context.Context, *connect.Request[v1.TrackUsageRequest]) (*connect.Response[v1.TrackUsageResponse], error)
 }
 
 // NewFinOpsServiceClient constructs a client for the olympus.finops.v1.FinOpsService service. By
@@ -61,21 +61,21 @@ type FinOpsServiceClient interface {
 // http://api.acme.com or https://acme.com/grpc).
 func NewFinOpsServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) FinOpsServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
-	finOpsServiceMethods := v1x.File_olympus_finops_v1_finops_proto.Services().ByName("FinOpsService").Methods()
+	finOpsServiceMethods := v1.File_olympus_finops_v1_finops_proto.Services().ByName("FinOpsService").Methods()
 	return &finOpsServiceClient{
-		estimateCost: connect.NewClient[v1x.EstimateCostRequest, v1x.EstimateCostResponse](
+		estimateCost: connect.NewClient[v1.EstimateCostRequest, v1.EstimateCostResponse](
 			httpClient,
 			baseURL+FinOpsServiceEstimateCostProcedure,
 			connect.WithSchema(finOpsServiceMethods.ByName("EstimateCost")),
 			connect.WithClientOptions(opts...),
 		),
-		validateBudget: connect.NewClient[v1x.ValidateBudgetRequest, v1x.ValidateBudgetResponse](
+		validateBudget: connect.NewClient[v1.ValidateBudgetRequest, v1.ValidateBudgetResponse](
 			httpClient,
 			baseURL+FinOpsServiceValidateBudgetProcedure,
 			connect.WithSchema(finOpsServiceMethods.ByName("ValidateBudget")),
 			connect.WithClientOptions(opts...),
 		),
-		trackUsage: connect.NewClient[v1x.TrackUsageRequest, v1x.TrackUsageResponse](
+		trackUsage: connect.NewClient[v1.TrackUsageRequest, v1.TrackUsageResponse](
 			httpClient,
 			baseURL+FinOpsServiceTrackUsageProcedure,
 			connect.WithSchema(finOpsServiceMethods.ByName("TrackUsage")),
@@ -86,32 +86,32 @@ func NewFinOpsServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 
 // finOpsServiceClient implements FinOpsServiceClient.
 type finOpsServiceClient struct {
-	estimateCost   *connect.Client[v1x.EstimateCostRequest, v1x.EstimateCostResponse]
-	validateBudget *connect.Client[v1x.ValidateBudgetRequest, v1x.ValidateBudgetResponse]
-	trackUsage     *connect.Client[v1x.TrackUsageRequest, v1x.TrackUsageResponse]
+	estimateCost   *connect.Client[v1.EstimateCostRequest, v1.EstimateCostResponse]
+	validateBudget *connect.Client[v1.ValidateBudgetRequest, v1.ValidateBudgetResponse]
+	trackUsage     *connect.Client[v1.TrackUsageRequest, v1.TrackUsageResponse]
 }
 
 // EstimateCost calls olympus.finops.v1.FinOpsService.EstimateCost.
-func (c *finOpsServiceClient) EstimateCost(ctx context.Context, req *connect.Request[v1x.EstimateCostRequest]) (*connect.Response[v1x.EstimateCostResponse], error) {
+func (c *finOpsServiceClient) EstimateCost(ctx context.Context, req *connect.Request[v1.EstimateCostRequest]) (*connect.Response[v1.EstimateCostResponse], error) {
 	return c.estimateCost.CallUnary(ctx, req)
 }
 
 // ValidateBudget calls olympus.finops.v1.FinOpsService.ValidateBudget.
-func (c *finOpsServiceClient) ValidateBudget(ctx context.Context, req *connect.Request[v1x.ValidateBudgetRequest]) (*connect.Response[v1x.ValidateBudgetResponse], error) {
+func (c *finOpsServiceClient) ValidateBudget(ctx context.Context, req *connect.Request[v1.ValidateBudgetRequest]) (*connect.Response[v1.ValidateBudgetResponse], error) {
 	return c.validateBudget.CallUnary(ctx, req)
 }
 
 // TrackUsage calls olympus.finops.v1.FinOpsService.TrackUsage.
-func (c *finOpsServiceClient) TrackUsage(ctx context.Context, req *connect.Request[v1x.TrackUsageRequest]) (*connect.Response[v1x.TrackUsageResponse], error) {
+func (c *finOpsServiceClient) TrackUsage(ctx context.Context, req *connect.Request[v1.TrackUsageRequest]) (*connect.Response[v1.TrackUsageResponse], error) {
 	return c.trackUsage.CallUnary(ctx, req)
 }
 
 // FinOpsServiceHandler is an implementation of the olympus.finops.v1.FinOpsService service.
 type FinOpsServiceHandler interface {
 	// Cloud Billing & Usage Intent
-	EstimateCost(context.Context, *connect.Request[v1x.EstimateCostRequest]) (*connect.Response[v1x.EstimateCostResponse], error)
-	ValidateBudget(context.Context, *connect.Request[v1x.ValidateBudgetRequest]) (*connect.Response[v1x.ValidateBudgetResponse], error)
-	TrackUsage(context.Context, *connect.Request[v1x.TrackUsageRequest]) (*connect.Response[v1x.TrackUsageResponse], error)
+	EstimateCost(context.Context, *connect.Request[v1.EstimateCostRequest]) (*connect.Response[v1.EstimateCostResponse], error)
+	ValidateBudget(context.Context, *connect.Request[v1.ValidateBudgetRequest]) (*connect.Response[v1.ValidateBudgetResponse], error)
+	TrackUsage(context.Context, *connect.Request[v1.TrackUsageRequest]) (*connect.Response[v1.TrackUsageResponse], error)
 }
 
 // NewFinOpsServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -120,7 +120,7 @@ type FinOpsServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewFinOpsServiceHandler(svc FinOpsServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
-	finOpsServiceMethods := v1x.File_olympus_finops_v1_finops_proto.Services().ByName("FinOpsService").Methods()
+	finOpsServiceMethods := v1.File_olympus_finops_v1_finops_proto.Services().ByName("FinOpsService").Methods()
 	finOpsServiceEstimateCostHandler := connect.NewUnaryHandler(
 		FinOpsServiceEstimateCostProcedure,
 		svc.EstimateCost,
@@ -156,14 +156,14 @@ func NewFinOpsServiceHandler(svc FinOpsServiceHandler, opts ...connect.HandlerOp
 // UnimplementedFinOpsServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedFinOpsServiceHandler struct{}
 
-func (UnimplementedFinOpsServiceHandler) EstimateCost(context.Context, *connect.Request[v1x.EstimateCostRequest]) (*connect.Response[v1x.EstimateCostResponse], error) {
+func (UnimplementedFinOpsServiceHandler) EstimateCost(context.Context, *connect.Request[v1.EstimateCostRequest]) (*connect.Response[v1.EstimateCostResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("olympus.finops.v1.FinOpsService.EstimateCost is not implemented"))
 }
 
-func (UnimplementedFinOpsServiceHandler) ValidateBudget(context.Context, *connect.Request[v1x.ValidateBudgetRequest]) (*connect.Response[v1x.ValidateBudgetResponse], error) {
+func (UnimplementedFinOpsServiceHandler) ValidateBudget(context.Context, *connect.Request[v1.ValidateBudgetRequest]) (*connect.Response[v1.ValidateBudgetResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("olympus.finops.v1.FinOpsService.ValidateBudget is not implemented"))
 }
 
-func (UnimplementedFinOpsServiceHandler) TrackUsage(context.Context, *connect.Request[v1x.TrackUsageRequest]) (*connect.Response[v1x.TrackUsageResponse], error) {
+func (UnimplementedFinOpsServiceHandler) TrackUsage(context.Context, *connect.Request[v1.TrackUsageRequest]) (*connect.Response[v1.TrackUsageResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("olympus.finops.v1.FinOpsService.TrackUsage is not implemented"))
 }
