@@ -1,0 +1,5 @@
+﻿{
+    "sdk":  "go",
+    "name":  "olympusgcp-finops",
+    "source":  "70000-Environmental-Harness/dagger"
+}
