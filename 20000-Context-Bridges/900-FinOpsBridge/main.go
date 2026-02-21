@@ -3,67 +3,158 @@ package main
 import (
 	"context"
 	"fmt"
-// 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 
 	"connectrpc.com/connect"
-	"mcp-go/mcp"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 
-	"OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1/finopsv1connect"
+	mcpv1 "Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/olympus/mcp/v1"
+	"Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/olympus/mcp/v1/mcpv1connect"
+
 	finopsv1 "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1"
-	"Olympus2/90000-Enablement-Labs/P0000-pkg/000-mcp-bridge"
+	"OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1/finopsv1connect"
 )
 
-func main() {
-	s := mcpbridge.NewBridgeServer("OlympusFinOpsBridge", "1.0.0")
+type FinOpsBridgeServer struct {
+	client finopsv1connect.FinOpsServiceClient
+	logger *slog.Logger
+}
 
-	client := finopsv1connect.NewFinOpsServiceClient(
-		http.DefaultClient,
-		"http://localhost:8093",
-	)
+// ---------------------------------------------------------
+// Tools Implementation
+// ---------------------------------------------------------
+func (s *FinOpsBridgeServer) ListTools(
+	ctx context.Context,
+	req *connect.Request[mcpv1.ListToolsRequest],
+) (*connect.Response[mcpv1.ListToolsResponse], error) {
 
-	s.AddTool(mcp.NewTool("finops_estimate_cost",
-		mcp.WithDescription("Estimate the GCP cost of a request. Args: {service: string, action: string}"),
-	), func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		m, err := mcpbridge.ExtractMap(request)
-		if err != nil {
-			return mcpbridge.HandleError(err)
-		}
+	// Define the tools this bridge exposes
+	tools := []*mcpv1.Tool{
+		{
+			Name:        "finops_estimate_cost",
+			Description: "Estimate the GCP cost of a request. Args: {service: string, action: string}",
+			InputSchema: nil, // Note: In a real implementation, you'd define the JSON Schema struct here
+		},
+		{
+			Name:        "finops_validate_budget",
+			Description: "Check if an operation fits within local safety budget. Args: {amount: number}",
+			InputSchema: nil,
+		},
+	}
 
-		service, _ := m["service"].(string)
-		action, _ := m["action"].(string)
+	return connect.NewResponse(&mcpv1.ListToolsResponse{
+		Tools: tools,
+	}), nil
+}
 
-		resp, err := client.EstimateCost(ctx, connect.NewRequest(&finopsv1.EstimateCostRequest{
+func (s *FinOpsBridgeServer) CallTool(
+	ctx context.Context,
+	req *connect.Request[mcpv1.CallToolRequest],
+) (*connect.Response[mcpv1.CallToolResponse], error) {
+
+	args := req.Msg.Arguments.AsMap()
+
+	switch req.Msg.Name {
+	case "finops_estimate_cost":
+		service, _ := args["service"].(string)
+		action, _ := args["action"].(string)
+
+		resp, err := s.client.EstimateCost(ctx, connect.NewRequest(&finopsv1.EstimateCostRequest{
 			Service: service,
 			Action:  action,
 		}))
+
 		if err != nil {
-			return mcpbridge.HandleError(err)
+			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("Estimated Cost: $%.2f (Confidence: %s)", resp.Msg.EstimatedUsd, resp.Msg.Confidence)), nil
-	})
+		msg := fmt.Sprintf("Estimated Cost: $%.2f (Confidence: %s)", resp.Msg.EstimatedUsd, resp.Msg.Confidence)
+		return connect.NewResponse(&mcpv1.CallToolResponse{
+			Content: []*mcpv1.Content{{Type: "text", Text: msg}},
+		}), nil
 
-	s.AddTool(mcp.NewTool("finops_validate_budget",
-		mcp.WithDescription("Check if an operation fits within local safety budget. Args: {amount: number}"),
-	), func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		m, err := mcpbridge.ExtractMap(request)
-		if err != nil {
-			return mcpbridge.HandleError(err)
-		}
+	case "finops_validate_budget":
+		amount, _ := args["amount"].(float64)
 
-		amount, _ := m["amount"].(float64)
-
-		resp, err := client.ValidateBudget(ctx, connect.NewRequest(&finopsv1.ValidateBudgetRequest{
+		resp, err := s.client.ValidateBudget(ctx, connect.NewRequest(&finopsv1.ValidateBudgetRequest{
 			ProjectId:       "local-dev",
 			RequestedAmount: amount,
 		}))
+
 		if err != nil {
-			return mcpbridge.HandleError(err)
+			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("Budget Approval: %t. Message: %s", resp.Msg.Approved, resp.Msg.Message)), nil
-	})
+		msg := fmt.Sprintf("Budget Approval: %t. Message: %s", resp.Msg.Approved, resp.Msg.Message)
+		return connect.NewResponse(&mcpv1.CallToolResponse{
+			Content: []*mcpv1.Content{{Type: "text", Text: msg}},
+		}), nil
 
-	s.Run()
+	default:
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("tool %s not found", req.Msg.Name))
+	}
+}
+
+// ---------------------------------------------------------
+// required ModelContextProtocolHandler boilerplate (stubbed)
+// ---------------------------------------------------------
+func (s *FinOpsBridgeServer) Initialize(ctx context.Context, req *connect.Request[mcpv1.InitializeRequest]) (*connect.Response[mcpv1.InitializeResponse], error) {
+	return connect.NewResponse(&mcpv1.InitializeResponse{
+		ProtocolVersion: "2024-11-05",
+		ServerInfo:      &mcpv1.ServerInfo{Name: "FinOpsBridge", Version: "1.0.0"},
+		Capabilities:    &mcpv1.ServerCapabilities{Tools: true},
+	}), nil
+}
+func (s *FinOpsBridgeServer) ListResources(context.Context, *connect.Request[mcpv1.ListResourcesRequest]) (*connect.Response[mcpv1.ListResourcesResponse], error) {
+	return connect.NewResponse(&mcpv1.ListResourcesResponse{}), nil
+}
+func (s *FinOpsBridgeServer) ReadResource(context.Context, *connect.Request[mcpv1.ReadResourceRequest]) (*connect.Response[mcpv1.ReadResourceResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, fmt.Errorf("unimplemented"))
+}
+func (s *FinOpsBridgeServer) ListResourceTemplates(context.Context, *connect.Request[mcpv1.ListResourceTemplatesRequest]) (*connect.Response[mcpv1.ListResourceTemplatesResponse], error) {
+	return connect.NewResponse(&mcpv1.ListResourceTemplatesResponse{}), nil
+}
+func (s *FinOpsBridgeServer) ListPrompts(context.Context, *connect.Request[mcpv1.ListPromptsRequest]) (*connect.Response[mcpv1.ListPromptsResponse], error) {
+	return connect.NewResponse(&mcpv1.ListPromptsResponse{}), nil
+}
+func (s *FinOpsBridgeServer) GetPrompt(context.Context, *connect.Request[mcpv1.GetPromptRequest]) (*connect.Response[mcpv1.GetPromptResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, fmt.Errorf("unimplemented"))
+}
+
+// ---------------------------------------------------------
+// MAIN
+// ---------------------------------------------------------
+func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
+
+	// Connect to internal Manager
+	backend := finopsv1connect.NewFinOpsServiceClient(http.DefaultClient, "http://localhost:8093")
+
+	server := &FinOpsBridgeServer{
+		client: backend,
+		logger: logger,
+	}
+
+	mux := http.NewServeMux()
+	path, handler := mcpv1connect.NewModelContextProtocolHandler(server)
+	mux.Handle(path, handler)
+
+	// Bind HTTP2/Connect endpoint (e.g. 8094 to avoid colliding with Manager)
+	addr := "127.0.0.1:8094"
+	logger.Info("Starting FinOps Connect RPC Bridge", "addr", addr)
+
+	// Note: Explicit ReadHeaderTimeout to satisfy G114!
+	srv := &http.Server{
+		Addr:              addr,
+		Handler:           h2c.NewHandler(mux, &http2.Server{}),
+		ReadHeaderTimeout: 5 * 1000 * 1000 * 1000,
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
+		logger.Error("bridge stopped", "error", err)
+		os.Exit(1)
+	}
 }

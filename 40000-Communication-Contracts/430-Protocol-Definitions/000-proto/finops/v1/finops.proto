@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package finops.v1;
+
+option go_package = "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1;finopsv1";
+
+service FinOpsService {
+  rpc ValidateBudget (ValidateBudgetRequest) returns (ValidateBudgetResponse);
+  rpc EstimateCost (EstimateCostRequest) returns (EstimateCostResponse);
+  rpc TrackUsage (TrackUsageRequest) returns (TrackUsageResponse);
+}
+
+message ValidateBudgetRequest {
+  string project_id = 1;
+  double requested_amount = 2;
+}
+
+message ValidateBudgetResponse {
+  bool approved = 1;
+  string message = 2;
+}
+
+message EstimateCostRequest {
+  string service = 1;
+  string action = 2;
+  map<string, string> parameters = 3;
+}
+
+message EstimateCostResponse {
+  double estimated_cost = 1;
+  double estimated_usd = 2;
+  string confidence = 3;
+}
+
+message TrackUsageRequest {
+  string service = 1;
+  string resource_id = 2;
+  double consumption_units = 3;
+}
+
+message TrackUsageResponse {
+  double current_mtd_usd = 1;
+}
