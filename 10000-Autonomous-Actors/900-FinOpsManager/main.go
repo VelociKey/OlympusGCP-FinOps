@@ -33,12 +33,8 @@ type FinOpsServer struct {
 
 func (s *FinOpsServer) EstimateCost(ctx context.Context, req *connect.Request[finv1.EstimateCostRequest]) (*connect.Response[finv1.EstimateCostResponse], error) {
 	start := time.Now()
-
 	price, ok := s.skus[req.Msg.Service]
-	if !ok {
-		price = 0.01 // Default safety price
-	}
-
+	if !ok { price = 0.01 }
 	s.logger.Log("ESTIMATE_COST", "SUCCESS", req.Msg.Service, "SKU_LOOKUP", time.Since(start))
 	return connect.NewResponse(&finv1.EstimateCostResponse{
 		EstimatedUsd: price,
@@ -49,54 +45,36 @@ func (s *FinOpsServer) EstimateCost(ctx context.Context, req *connect.Request[fi
 func (s *FinOpsServer) ValidateBudget(ctx context.Context, req *connect.Request[finv1.ValidateBudgetRequest]) (*connect.Response[finv1.ValidateBudgetResponse], error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	used := 0.0
-	for _, v := range s.usage {
-		used += v
-	}
-
+	for _, v := range s.usage { used += v }
 	approved := (used + req.Msg.RequestedAmount) <= s.budget
 	msg := "Within Workstation Local Quota"
-	if !approved {
-		msg = "Workstation Budget Exceeded"
-	}
-
-	return connect.NewResponse(&finv1.ValidateBudgetResponse{
-		Approved: approved,
-		Message:  msg,
-	}), nil
+	if !approved { msg = "Workstation Budget Exceeded" }
+	return connect.NewResponse(&finv1.ValidateBudgetResponse{Approved: approved, Message: msg}), nil
 }
 
 func (s *FinOpsServer) TrackUsage(ctx context.Context, req *connect.Request[finv1.TrackUsageRequest]) (*connect.Response[finv1.TrackUsageResponse], error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	price, ok := s.skus[req.Msg.Service]
-	if !ok {
-		price = 0.01
-	}
-
+	if !ok { price = 0.01 }
 	totalCost := req.Msg.ConsumptionUnits * price
 	s.usage[req.Msg.Service] += totalCost
-
 	used := 0.0
-	for _, v := range s.usage {
-		used += v
-	}
-
-	return connect.NewResponse(&finv1.TrackUsageResponse{
-		CurrentMtdUsd: used,
-	}), nil
+	for _, v := range s.usage { used += v }
+	return connect.NewResponse(&finv1.TrackUsageResponse{CurrentMtdUsd: used}), nil
 }
 
 func main() {
 	w := whisper.New("FinOpsManager", "gcp_finops.lpsv")
+	defer w.Close()
 
-	// Load SKU Database
 	skuData, err := os.ReadFile("C0100-Configuration-Registry/settings/sku_pricing.json")
 	var skus SkuConfig
 	if err == nil {
-		json.Unmarshal(skuData, &skus)
+		if err := json.Unmarshal(skuData, &skus); err != nil {
+			slog.Error("Failed to unmarshal SKU pricing", "error", err)
+		}
 	} else {
 		slog.Warn("FinOpsManager: Failed to load SKU database, using empty map", "error", err)
 		skus.Skus = make(map[string]float64)
@@ -105,21 +83,28 @@ func main() {
 	server := &FinOpsServer{
 		logger: w,
 		usage:  make(map[string]float64),
-		budget: 500.0, // Expanded workstation budget
+		budget: 500.0,
 		skus:   skus.Skus,
 	}
 
 	mux := http.NewServeMux()
-	path, handler := finopsv1connect.NewFinOpsServiceHandler(server)
-	mux.Handle(path, handler)
+	mux.Handle(finopsv1connect.NewFinOpsServiceHandler(server))
 
 	port := "8098"
-	slog.Info("FinOpsManager: Booting High-Fidelity Economic Substrate...", "port", port)
+	slog.Info("FinOpsManager: Listening...", "addr", "localhost:"+port)
 
-	http.ListenAndServe(
-		"localhost:"+port,
-		h2c.NewHandler(mux, &http2.Server{}),
-	)
+	srv := &http.Server{
+		Addr:         "localhost:"+port,
+		Handler:      h2c.NewHandler(mux, &http2.Server{}),
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		slog.Error("Server failed", "error", err)
+		os.Exit(1)
+	}
 }
 func init() {
 	_ = econotel.RecordEconomicEvent
