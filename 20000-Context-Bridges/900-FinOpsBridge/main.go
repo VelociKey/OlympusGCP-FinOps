@@ -10,6 +10,7 @@ import (
 	"connectrpc.com/connect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	mcpv1 "Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/olympus/mcp/v1"
 	"Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/olympus/mcp/v1/mcpv1connect"
@@ -31,17 +32,34 @@ func (s *FinOpsBridgeServer) ListTools(
 	req *connect.Request[mcpv1.ListToolsRequest],
 ) (*connect.Response[mcpv1.ListToolsResponse], error) {
 
+	estCostSchema, _ := structpb.NewStruct(map[string]interface{}{
+		"type": "object",
+		"properties": map[string]interface{}{
+			"service": map[string]interface{}{"type": "string"},
+			"action":  map[string]interface{}{"type": "string"},
+		},
+		"required": []interface{}{"service", "action"},
+	})
+
+	valBudgetSchema, _ := structpb.NewStruct(map[string]interface{}{
+		"type": "object",
+		"properties": map[string]interface{}{
+			"amount": map[string]interface{}{"type": "number"},
+		},
+		"required": []interface{}{"amount"},
+	})
+
 	// Define the tools this bridge exposes
 	tools := []*mcpv1.Tool{
 		{
 			Name:        "finops_estimate_cost",
-			Description: "Estimate the GCP cost of a request. Args: {service: string, action: string}",
-			InputSchema: nil, // Note: In a real implementation, you'd define the JSON Schema struct here
+			Description: "Estimate the GCP cost of a request based on the service and action.",
+			InputSchema: estCostSchema,
 		},
 		{
 			Name:        "finops_validate_budget",
-			Description: "Check if an operation fits within local safety budget. Args: {amount: number}",
-			InputSchema: nil,
+			Description: "Check if an operation fits within the local safety budget limit.",
+			InputSchema: valBudgetSchema,
 		},
 	}
 
@@ -71,7 +89,8 @@ func (s *FinOpsBridgeServer) CallTool(
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 
-		msg := fmt.Sprintf("Estimated Cost: $%.2f (Confidence: %s)", resp.Msg.EstimatedUsd, resp.Msg.Confidence)
+		// Return structurally typed jeBNF payload
+		msg := fmt.Sprintf("Result { EstimatedCost = %.2f; Confidence = \"%s\"; }", resp.Msg.EstimatedUsd, resp.Msg.Confidence)
 		return connect.NewResponse(&mcpv1.CallToolResponse{
 			Content: []*mcpv1.Content{{Type: "text", Text: msg}},
 		}), nil
@@ -88,7 +107,8 @@ func (s *FinOpsBridgeServer) CallTool(
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 
-		msg := fmt.Sprintf("Budget Approval: %t. Message: %s", resp.Msg.Approved, resp.Msg.Message)
+		// Return structurally typed jeBNF payload
+		msg := fmt.Sprintf("Result { Approved = %t; Message = \"%s\"; }", resp.Msg.Approved, resp.Msg.Message)
 		return connect.NewResponse(&mcpv1.CallToolResponse{
 			Content: []*mcpv1.Content{{Type: "text", Text: msg}},
 		}), nil
