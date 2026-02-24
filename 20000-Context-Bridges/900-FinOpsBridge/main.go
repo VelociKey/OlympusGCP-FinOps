@@ -12,11 +12,11 @@ import (
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/protobuf/types/known/structpb"
 
-	mcpv1 "Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/olympus/mcp/v1"
-	"Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/olympus/mcp/v1/mcpv1connect"
+	mcpv1 "Olympus2/gen/v1/mcp"
+	mcpv1connect "Olympus2/gen/v1/mcp/mcpv1connect"
 
-	finopsv1 "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1"
-	"OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1/finopsv1connect"
+	finopsv1 "OlympusGCP-FinOps/gen/v1/finops"
+	"OlympusGCP-FinOps/gen/v1/finops/finopsv1connect"
 )
 
 type FinOpsBridgeServer struct {

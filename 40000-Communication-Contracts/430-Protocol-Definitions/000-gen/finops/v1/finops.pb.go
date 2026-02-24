@@ -387,7 +387,7 @@ const file_finops_v1_finops_proto_rawDesc = "" +
 	"\x0eValidateBudget\x12 .finops.v1.ValidateBudgetRequest\x1a!.finops.v1.ValidateBudgetResponse\x12O\n" +
 	"\fEstimateCost\x12\x1e.finops.v1.EstimateCostRequest\x1a\x1f.finops.v1.EstimateCostResponse\x12I\n" +
 	"\n" +
-	"TrackUsage\x12\x1c.finops.v1.TrackUsageRequest\x1a\x1d.finops.v1.TrackUsageResponseBeZcOlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1;finopsv1b\x06proto3"
+	"TrackUsage\x12\x1c.finops.v1.TrackUsageRequest\x1a\x1d.finops.v1.TrackUsageResponseBeZcOlympusGCP-FinOps/gen/v1/finops;finopsv1b\x06proto3"
 
 var (
 	file_finops_v1_finops_proto_rawDescOnce sync.Once

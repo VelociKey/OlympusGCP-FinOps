@@ -1,47 +1,29 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
 
-	finopsv1 "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1"
-	"OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1/finopsv1connect"
+	"OlympusGCP-FinOps/gen/v1/finops/finopsv1connect"
+	"OlympusGCP-FinOps/10000-Autonomous-Actors/10700-Processing-Engines/10710-Reasoning-Inference/inference"
 
-	"connectrpc.com/connect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
 
-type FinOpsServer struct{}
-
-func (s *FinOpsServer) ValidateBudget(ctx context.Context, req *connect.Request[finopsv1.ValidateBudgetRequest]) (*connect.Response[finopsv1.ValidateBudgetResponse], error) {
-	slog.Info("ValidateBudget", "project", req.Msg.ProjectId, "amount", req.Msg.RequestedAmount)
-	// YOLO: All budgets approved
-	return connect.NewResponse(&finopsv1.ValidateBudgetResponse{Approved: true, Message: "YOLO Approved"}), nil
-}
-
-func (s *FinOpsServer) EstimateCost(ctx context.Context, req *connect.Request[finopsv1.EstimateCostRequest]) (*connect.Response[finopsv1.EstimateCostResponse], error) {
-	slog.Info("EstimateCost", "service", req.Msg.Service, "action", req.Msg.Action)
-	// Mock cost
-	return connect.NewResponse(&finopsv1.EstimateCostResponse{
-		EstimatedCost: 0.05,
-		EstimatedUsd:  0.05,
-		Confidence:    "LOW",
-	}), nil
-}
-
-func (s *FinOpsServer) TrackUsage(ctx context.Context, req *connect.Request[finopsv1.TrackUsageRequest]) (*connect.Response[finopsv1.TrackUsageResponse], error) {
-	slog.Info("TrackUsage", "service", req.Msg.Service, "units", req.Msg.ConsumptionUnits)
-	return connect.NewResponse(&finopsv1.TrackUsageResponse{CurrentMtdUsd: 0.0}), nil
-}
-
 func main() {
-	server := &FinOpsServer{}
+	server := &inference.FinOpsServer{}
 	mux := http.NewServeMux()
 	path, handler := finopsv1connect.NewFinOpsServiceHandler(server)
 	mux.Handle(path, handler)
+
+	// Health Check / Pulse
+	mux.HandleFunc("/pulse", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"status":"HEALTHY", "workspace":"OlympusGCP-FinOps", "time":"%s"}`, time.Now().Format(time.RFC3339))
+	})
 
 	port := "8098" // From genesis.json
 	slog.Info("FinOpsManager starting", "port", port)

@@ -4,12 +4,13 @@ import (
 	"context"
 	"testing"
 
-	finopsv1 "OlympusGCP-FinOps/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/finops/v1"
+	finopsv1 "OlympusGCP-FinOps/gen/v1/finops"
+	"OlympusGCP-FinOps/10000-Autonomous-Actors/10700-Processing-Engines/10710-Reasoning-Inference/inference"
 	"connectrpc.com/connect"
 )
 
 func TestFinOpsServer(t *testing.T) {
-	server := &FinOpsServer{}
+	server := &inference.FinOpsServer{}
 	ctx := context.Background()
 
 	// Test ValidateBudget
@@ -32,8 +33,8 @@ func TestFinOpsServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("EstimateCost failed: %v", err)
 	}
-	if costRes.Msg.EstimatedCost <= 0 {
-		t.Errorf("Expected positive cost, got %f", costRes.Msg.EstimatedCost)
+	if costRes.Msg.EstimatedUsd <= 0 {
+		t.Errorf("Expected positive cost, got %f", costRes.Msg.EstimatedUsd)
 	}
 
 	// Test TrackUsage
