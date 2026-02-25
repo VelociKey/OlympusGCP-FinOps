@@ -4,29 +4,32 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
 func main() {
-	cluster := "FinOps"
+	fmt.Println("Starting OlympusGCP-FinOps Provisioner (Dagger-Driven)...")
 
-	fmt.Printf("Starting %s Provisioner...\n", cluster)
-	targets := []struct{ name, path string }{
-		{"FinOpsManager", "10000-Autonomous-Actors/900-FinOpsManager"},
-		{"FinOpsBridge", "20000-Context-Bridges/900-FinOpsBridge"},
-	}
-	for _, t := range targets {
-		fmt.Printf("Building %s via Dagger...\n", t.name)
-
-		// Execute Dagger workstation-native build
-		cmd := exec.Command("dagger", "call", "build")
-		cmd.Dir = "." // Cluster root
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		if err := cmd.Run(); err != nil {
-			fmt.Printf("Dagger build failed for %s: %v\n", t.name, err)
-			os.Exit(1)
-		}
+	// Detect Fleet Root
+	wd, _ := os.Getwd()
+	root := wd
+	if filepath.Base(wd) == "OlympusGCP-FinOps" {
+		root = filepath.Dir(wd)
 	}
 
-	fmt.Printf("%s built successfully.\n", cluster)
+	forgePkg := filepath.Join(root, "OlympusForge", "90000-Enablement-Labs", "900-Forge")
+
+	fmt.Println("⚒️ Building OlympusGCP-FinOps via Forge Pipeline...")
+
+	cmd := exec.Command("go", "run", forgePkg, "-target", "native", "-workspace", "OlympusGCP-FinOps")
+	cmd.Dir = root
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("❌ OlympusGCP-FinOps provisioning failed: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("✅ OlympusGCP-FinOps provisioning complete.")
 }
