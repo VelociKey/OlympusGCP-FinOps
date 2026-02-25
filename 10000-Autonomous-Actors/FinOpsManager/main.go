@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"OlympusGCP-FinOps/gen/v1/finops/finopsv1connect"
@@ -14,7 +18,9 @@ import (
 )
 
 func main() {
-	server := &inference.FinOpsServer{}
+	computeURL := getEnv("COMPUTE_URL", "http://localhost:8095")
+	server := inference.NewFinOpsServer(computeURL)
+
 	mux := http.NewServeMux()
 	path, handler := finopsv1connect.NewFinOpsServiceHandler(server)
 	mux.Handle(path, handler)
@@ -33,8 +39,26 @@ func main() {
 		Handler:           h2c.NewHandler(mux, &http2.Server{}),
 		ReadHeaderTimeout: 3 * time.Second,
 	}
-	err := srv.ListenAndServe()
-	if err != nil {
-		slog.Error("Server failed", "error", err)
+
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			slog.Error("Server failed", "error", err)
+		}
+	}()
+
+	<-done
+	slog.Info("FinOpsManager shutting down...")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	srv.Shutdown(ctx)
+}
+
+func getEnv(key, fallback string) string {
+	if val, ok := os.LookupEnv(key); ok {
+		return val
 	}
+	return fallback
 }

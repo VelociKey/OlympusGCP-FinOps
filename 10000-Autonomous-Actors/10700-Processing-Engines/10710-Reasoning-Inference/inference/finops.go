@@ -2,23 +2,53 @@ package inference
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+	"net/http"
 
 	finopsv1 "OlympusGCP-FinOps/gen/v1/finops"
+	computev1 "OlympusGCP-Compute/gen/v1/compute"
+	"OlympusGCP-Compute/gen/v1/compute/computev1connect"
 	"connectrpc.com/connect"
 )
 
-type FinOpsServer struct{}
+type FinOpsServer struct {
+	computeClient computev1connect.ComputeServiceClient
+}
+
+func NewFinOpsServer(computeURL string) *FinOpsServer {
+	return &FinOpsServer{
+		computeClient: computev1connect.NewComputeServiceClient(http.DefaultClient, computeURL),
+	}
+}
 
 func (s *FinOpsServer) ValidateBudget(ctx context.Context, req *connect.Request[finopsv1.ValidateBudgetRequest]) (*connect.Response[finopsv1.ValidateBudgetResponse], error) {
 	slog.Info("ValidateBudget", "project", req.Msg.ProjectId, "amount", req.Msg.RequestedAmount)
-	// YOLO: All budgets approved
-	return connect.NewResponse(&finopsv1.ValidateBudgetResponse{Approved: true, Message: "YOLO Approved"}), nil
+	
+	// Deep Emulation: Query Compute for service health before approving budget
+	healthRes, err := s.computeClient.CheckHealth(ctx, connect.NewRequest(&computev1.CheckHealthRequest{
+		ServiceName: "finops-validator",
+	}))
+	
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to reach compute service: %w", err))
+	}
+
+	if healthRes.Msg.Status != computev1.CheckHealthResponse_HEALTHY {
+		return connect.NewResponse(&finopsv1.ValidateBudgetResponse{
+			Approved: false,
+			Message:  "Compute substrate unhealthy, budget approval suspended",
+		}), nil
+	}
+
+	return connect.NewResponse(&finopsv1.ValidateBudgetResponse{
+		Approved: true,
+		Message:  "Budget approved against healthy compute substrate",
+	}), nil
 }
 
 func (s *FinOpsServer) EstimateCost(ctx context.Context, req *connect.Request[finopsv1.EstimateCostRequest]) (*connect.Response[finopsv1.EstimateCostResponse], error) {
 	slog.Info("EstimateCost", "service", req.Msg.Service, "action", req.Msg.Action)
-	// Mock cost
 	return connect.NewResponse(&finopsv1.EstimateCostResponse{
 		EstimatedUsd:  0.05,
 		Confidence:    "LOW",

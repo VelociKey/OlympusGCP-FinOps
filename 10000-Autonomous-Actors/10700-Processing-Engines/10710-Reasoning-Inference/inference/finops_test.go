@@ -1,4 +1,4 @@
-package main
+package inference
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 	finopsv1 "OlympusGCP-FinOps/gen/v1/finops"
 	computev1 "OlympusGCP-Compute/gen/v1/compute"
 	"OlympusGCP-Compute/gen/v1/compute/computev1connect"
-	"OlympusGCP-FinOps/10000-Autonomous-Actors/10700-Processing-Engines/10710-Reasoning-Inference/inference"
 	"connectrpc.com/connect"
 )
 
@@ -21,26 +20,39 @@ func (h *mockComputeHandler) CheckHealth(ctx context.Context, req *connect.Reque
 	return connect.NewResponse(&computev1.CheckHealthResponse{Status: computev1.CheckHealthResponse_HEALTHY}), nil
 }
 
-func TestFinOpsServer_DeepEmulation(t *testing.T) {
-	// 1. Setup Mock Compute Service
+func TestFinOpsServer_CoverageExpansion(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.Handle(computev1connect.NewComputeServiceHandler(&mockComputeHandler{}))
 	srv := httptest.NewServer(mux)
 	defer srv.Close()
 
-	// 2. Initialize FinOps with Mock URL
-	server := inference.NewFinOpsServer(srv.URL)
+	server := NewFinOpsServer(srv.URL)
 	ctx := context.Background()
 
-	// 3. Test ValidateBudget
-	budgetRes, err := server.ValidateBudget(ctx, connect.NewRequest(&finopsv1.ValidateBudgetRequest{
-		ProjectId:       "p1",
-		RequestedAmount: 100.0,
+	// 1. Test ValidateBudget
+	res, err := server.ValidateBudget(ctx, connect.NewRequest(&finopsv1.ValidateBudgetRequest{
+		ProjectId: "p1",
+		RequestedAmount: 50.0,
+	}))
+	if err != nil || !res.Msg.Approved {
+		t.Errorf("ValidateBudget failed: %v", err)
+	}
+
+	// 2. Test EstimateCost
+	_, err = server.EstimateCost(ctx, connect.NewRequest(&finopsv1.EstimateCostRequest{
+		Service: "storage",
+		Action: "run",
 	}))
 	if err != nil {
-		t.Fatalf("ValidateBudget failed: %v", err)
+		t.Error("EstimateCost failed")
 	}
-	if !budgetRes.Msg.Approved {
-		t.Error("Expected budget to be approved against healthy compute")
+
+	// 3. Test TrackUsage
+	_, err = server.TrackUsage(ctx, connect.NewRequest(&finopsv1.TrackUsageRequest{
+		Service: "storage",
+		ConsumptionUnits: 5,
+	}))
+	if err != nil {
+		t.Error("TrackUsage failed")
 	}
 }
