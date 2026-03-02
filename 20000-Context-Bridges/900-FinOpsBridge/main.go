@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"os"
 
-	"olympus.fleet/ext/connectrpc/connect"
+	"connectrpc.com/connect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
-	"olympus.fleet/00SDLC/Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/google/protobuf"
+	"google.golang.org/protobuf/reflect/protoreflect"
 
 	mcpv1 "olympus.fleet/00SDLC/Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/olympus/mcp/v1"
 	mcpv1connect "olympus.fleet/00SDLC/Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/olympus/mcp/v1/mcpv1connect"

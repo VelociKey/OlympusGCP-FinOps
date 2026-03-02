@@ -6,7 +6,7 @@ package finopsv1connect
 
 import (
 	finops "OlympusGCP-FinOps/gen/v1/finops"
-	connect "olympus.fleet/ext/connectrpc/connect"
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
 	http "net/http"
