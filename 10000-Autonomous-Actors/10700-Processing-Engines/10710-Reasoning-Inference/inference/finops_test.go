@@ -9,7 +9,7 @@ import (
 	finopsv1 "OlympusGCP-FinOps/gen/v1/finops"
 	computev1 "OlympusGCP-Compute/gen/v1/compute"
 	"OlympusGCP-Compute/gen/v1/compute/computev1connect"
-	"connectrpc.com/connect"
+	"olympus.fleet/ext/connectrpc/connect"
 )
 
 type mockComputeHandler struct {

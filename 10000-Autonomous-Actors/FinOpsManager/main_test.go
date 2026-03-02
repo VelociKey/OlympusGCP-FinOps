@@ -10,7 +10,7 @@ import (
 	computev1 "OlympusGCP-Compute/gen/v1/compute"
 	"OlympusGCP-Compute/gen/v1/compute/computev1connect"
 	"OlympusGCP-FinOps/10000-Autonomous-Actors/10700-Processing-Engines/10710-Reasoning-Inference/inference"
-	"connectrpc.com/connect"
+	"olympus.fleet/ext/connectrpc/connect"
 )
 
 type mockComputeHandler struct {

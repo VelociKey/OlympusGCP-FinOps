@@ -17,7 +17,7 @@ func main() {
 		root = filepath.Dir(wd)
 	}
 
-	forgePkg := filepath.Join(root, "OlympusForge", "90000-Enablement-Labs", "900-Forge")
+	forgePkg := filepath.Join(root, "OlympusForge", "90000-Enablement-Labs", "olympus.fleet/00SDLC/OlympusForge/90000-Enablement-Labs/900-Forge")
 
 	fmt.Println("⚒️ Building OlympusGCP-FinOps via Forge Pipeline...")
 
