@@ -5,7 +5,7 @@
 package finopsv1connect
 
 import (
-	finops "OlympusGCP-FinOps/gen/v1/finops"
+	finops "olympus.fleet/00SDLC/OlympusGCP-FinOps/gen/v1/finops"
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"

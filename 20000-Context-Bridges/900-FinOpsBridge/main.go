@@ -12,11 +12,11 @@ import (
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
-	mcpv1 "olympus.fleet/00SDLC/Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/olympus/mcp/v1"
-	mcpv1connect "olympus.fleet/00SDLC/Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/000-gen/olympus/mcp/v1/mcpv1connect"
+	mcpv1 "olympus.fleet/00SDLC/Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/400-Gen/olympus/mcp/v1"
+	mcpv1connect "olympus.fleet/00SDLC/Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/400-Gen/olympus/mcp/v1/mcpv1connect"
 
-	finopsv1 "OlympusGCP-FinOps/gen/v1/finops"
-	"OlympusGCP-FinOps/gen/v1/finops/finopsv1connect"
+	finopsv1 "olympus.fleet/00SDLC/OlympusGCP-FinOps/gen/v1/finops"
+	"olympus.fleet/00SDLC/OlympusGCP-FinOps/gen/v1/finops/finopsv1connect"
 )
 
 type FinOpsBridgeServer struct {
