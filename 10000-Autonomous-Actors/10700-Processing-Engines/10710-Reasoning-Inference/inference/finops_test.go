@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	finopsv1 "OlympusGCP-FinOps/gen/v1/finops"
-	computev1 "OlympusGCP-Compute/gen/v1/compute"
-	"OlympusGCP-Compute/gen/v1/compute/computev1connect"
+	finopsv1 "olympus.fleet/00SDLC/OlympusGCP-FinOps/gen/v1/finops"
+	computev1 "olympus.fleet/00SDLC/OlympusGCP-Compute/gen/v1/compute"
+	"olympus.fleet/00SDLC/OlympusGCP-Compute/gen/v1/compute/computev1connect"
 	"connectrpc.com/connect"
 )
 

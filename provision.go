@@ -17,11 +17,11 @@ func main() {
 		root = filepath.Dir(wd)
 	}
 
-	forgePkg := filepath.Join(root, "OlympusForge", "90000-Enablement-Labs", "900-Forge")
+	forgePkg := filepath.Join(root, "00SDLC", "OlympusForge", "90000-Enablement-Labs", "900-Forge")
 
-	fmt.Println("⚒️ Building OlympusGCP-FinOps via Forge Pipeline...")
+	fmt.Println("🔨 Building OlympusGCP-FinOps via Forge Pipeline...")
 
-	cmd := exec.Command("go", "run", forgePkg, "-target", "native", "-workspace", "OlympusGCP-FinOps")
+	cmd := exec.Command("go", "run", forgePkg, "-target", "native", "-workspace", "00SDLC/OlympusGCP-FinOps")
 	cmd.Dir = root
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

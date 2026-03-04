@@ -1,7 +1,7 @@
 package main
 
 import "context"
-import "dagger/olympusgcp-finops/internal/dagger"
+import "olympus.fleet/00SDLC/OlympusForge/70000-Environmental-Harness/dagger/olympusgcp-finops/internal/dagger"
 
 type OlympusGCPFinOps struct{}
 
