@@ -10,7 +10,7 @@ import (
 	"connectrpc.com/connect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
-	"google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/reflect/protoreflect"
 
 	mcpv1 "olympus.fleet/00SDLC/Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/400-Gen/olympus/mcp/v1"
 	mcpv1connect "olympus.fleet/00SDLC/Olympus2/40000-Communication-Contracts/430-Protocol-Definitions/400-Gen/olympus/mcp/v1/mcpv1connect"
