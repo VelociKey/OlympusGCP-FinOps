@@ -5,7 +5,7 @@
 package finopsv1connect
 
 import (
-	finops "olympus.fleet/00SDLC/OlympusGCP-FinOps/gen/v1/finops"
+	finops "olympus.fleet/00SDLC/OlympusGCP-FinOps/40000-Communication-Contracts/40400-Protocol-Synthetics/connect-rpc/gen/v1/finops"
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
